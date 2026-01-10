@@ -1,0 +1,9 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    
+    # Forward root to public/
+    RewriteRule ^$ public/ [L]
+    
+    # Forward any other request that DOES NOT start with public/ to public/
+    RewriteRule ^((?!public/).*)$ public/$1 [L]
+</IfModule>
