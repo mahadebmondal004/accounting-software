@@ -2,11 +2,10 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4 fade-in-up">
     <div>
-        <a href="<?php echo APP_URL; ?>/estimates/index" class="btn-neu btn-neu-sm mb-2"><i
-                class="fas fa-arrow-left"></i>
+        <a href="<?php echo APP_URL; ?>/sales/index" class="btn-neu btn-neu-sm mb-2"><i class="fas fa-arrow-left"></i>
             Back</a>
-        <h1 class="h3 mb-0 text-gradient">Estimate #
-            <?php echo $data['estimate']->estimate_number; ?>
+        <h1 class="h3 mb-0 text-gradient">Invoice #
+            <?php echo $data['voucher']->voucher_number; ?>
         </h1>
     </div>
     <div class="d-flex gap-2">
@@ -37,15 +36,15 @@
         <div class="col-5 text-end">
             <h1 class="fw-bold text-uppercase mb-3"
                 style="font-size: 3rem; color: #eaeaec; letter-spacing: 2px; line-height: 1;">
-                ESTIMATE
+                INVOICE
             </h1>
             <table class="table table-bordered mb-0" style="width: 100%; border-color: #dee2e6;">
                 <tr>
                     <td class="text-start py-2 px-3 align-middle"
                         style="width: 40%; font-size: 0.8rem; font-weight: bold; color: #6c757d; text-transform: uppercase;">
-                        Estimate No</td>
+                        Invoice No</td>
                     <td class="text-end py-2 px-3 align-middle fw-bold" style="font-size: 1rem; color: #2c3e50;">
-                        <?php echo $data['estimate']->estimate_number; ?>
+                        <?php echo $data['voucher']->voucher_number; ?>
                     </td>
                 </tr>
                 <tr>
@@ -53,7 +52,7 @@
                         style="font-size: 0.8rem; font-weight: bold; color: #6c757d; text-transform: uppercase;">Date
                     </td>
                     <td class="text-end py-2 px-3 align-middle fw-bold" style="font-size: 1rem; color: #2c3e50;">
-                        <?php echo date('d M Y', strtotime($data['estimate']->estimate_date)); ?>
+                        <?php echo date('d M Y', strtotime($data['voucher']->voucher_date)); ?>
                     </td>
                 </tr>
             </table>
@@ -65,7 +64,7 @@
         <div class="row">
             <div class="col-6">
                 <small class="text-uppercase fw-bold text-muted mb-2 d-block"
-                    style="font-size: 0.75rem; letter-spacing: 1px;">Estimate For:</small>
+                    style="font-size: 0.75rem; letter-spacing: 1px;">Bill To:</small>
                 <h5 class="fw-bold mb-1" style="color: #2c3e50;"><?php echo $data['customer']->name; ?></h5>
                 <p class="mb-0 text-muted" style="font-size: 0.9rem; max-width: 80%;">
                     <?php echo $data['customer']->address ?? 'Address not available'; ?>
@@ -112,18 +111,7 @@
                 </tr>
             </thead>
             <tbody>
-                <?php
-                $total_taxable = 0;
-                $total_tax = 0;
-                $grand_total = 0;
-
-                foreach ($data['items'] as $index => $item):
-                    $taxable = $item->quantity * $item->rate;
-                    $tax_amt = $item->tax_amount;
-                    $total_taxable += $taxable;
-                    $total_tax += $tax_amt;
-                    $grand_total += $item->total;
-                    ?>
+                <?php foreach ($data['items'] as $index => $item): ?>
                     <tr style="border-bottom: 1px solid #eee;">
                         <td class="ps-3 py-3 align-middle" style="color: #2c3e50; font-weight: 600;">
                             <?php echo $item->item_name; ?>
@@ -171,12 +159,20 @@
             <div class="p-3 rounded" style="border: 1px solid #eee;">
                 <p class="mb-1 text-uppercase fw-bold text-muted" style="font-size: 0.75rem;">Notes / Terms:</p>
                 <p class="mb-0 text-muted fst-italic" style="font-size: 0.85rem;">
-                    This estimate is valid for 30 days.
+                    Thank you for your business. Payment is due within 30 days.
                 </p>
             </div>
         </div>
         <div class="col-5">
             <table class="table table-borderless mb-0">
+                <?php
+                $total_taxable = 0;
+                $total_tax = 0;
+                foreach ($data['items'] as $item) {
+                    $total_taxable += $item->amount;
+                    $total_tax += $item->tax_amount;
+                }
+                ?>
                 <tr>
                     <td class="text-end text-muted py-1">Taxable Amount:</td>
                     <td class="text-end fw-bold py-1 text-dark" style="font-size: 1rem;">₹
@@ -193,7 +189,7 @@
                     <td class="text-end fw-bold py-3 text-uppercase" style="color: #2c3e50; font-size: 1.1rem;">Grand
                         Total:</td>
                     <td class="text-end fw-bold py-3" style="color: #2c3e50; font-size: 1.4rem;">₹
-                        <?php echo number_format($grand_total, 2); ?>
+                        <?php echo number_format($data['voucher']->total_amount, 2); ?>
                     </td>
                 </tr>
             </table>
@@ -218,7 +214,7 @@
     <!-- Final Footer -->
     <div class="row mt-4">
         <div class="col-12 text-center text-muted">
-            <p class="small mb-0">This is a system generated estimate.</p>
+            <p class="small mb-0">This is a system generated invoice.</p>
         </div>
     </div>
 </div>

@@ -191,4 +191,31 @@ class Report
         $this->db->bind(':end', $end_date);
         return $this->db->resultSet();
     }
+
+    public function getDetailedGSTReport($company_id, $type, $start_date, $end_date)
+    {
+        // Type: 'Sales' or 'Purchase'
+        $sql = "
+            SELECT v.voucher_date, v.voucher_number, l.name as party_name,
+                   ii.item_name, ii.amount as taxable_amount,
+                   ii.cgst_amount, ii.sgst_amount, ii.igst_amount, ii.tax_amount
+            FROM vouchers v
+            JOIN invoice_items ii ON v.id = ii.voucher_id
+            LEFT JOIN voucher_entries ve ON v.id = ve.voucher_id 
+                AND ((v.voucher_type = 'Sales' AND ve.debit > 0) OR (v.voucher_type = 'Purchase' AND ve.credit > 0))
+            LEFT JOIN ledgers l ON ve.ledger_id = l.id
+            WHERE v.company_id = :cid 
+            AND v.voucher_type = :type
+            AND v.voucher_date BETWEEN :start AND :end
+            GROUP BY ii.id
+            ORDER BY v.voucher_date ASC
+        ";
+
+        $this->db->query($sql);
+        $this->db->bind(':cid', $company_id);
+        $this->db->bind(':type', $type);
+        $this->db->bind(':start', $start_date);
+        $this->db->bind(':end', $end_date);
+        return $this->db->resultSet();
+    }
 }

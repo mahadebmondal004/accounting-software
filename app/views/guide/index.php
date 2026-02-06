@@ -190,7 +190,7 @@
         <ul class="mb-0">
             <li>Enter item name, HSN/SAC code</li>
             <li>Set sale price, purchase price</li>
-            <li>Configure tax rates (GST)</li>
+            <li>Configure Tax % (e.g., 18). System splits this into CGST/SGST (9%+9%) automatically for In-State.</li>
             <li>Track stock quantity</li>
         </ul>
     </div>
@@ -205,9 +205,11 @@
         <p>Use <code>Quick Create → Sales Invoice</code> or <code>Transactions → Sales Invoice</code></p>
         <ol class="mb-0">
             <li>Select Customer</li>
+            <li><strong>Select Tax Type:</strong> Choose 'In-State' (CGST+SGST) or 'Out-State' (IGST). Columns adjust
+                automatically.</li>
             <li>Add Items (products/services)</li>
             <li>Enter Quantity & Rate</li>
-            <li>System auto-calculates tax & total</li>
+            <li>System calculates Split Tax (CGST/SGST or IGST) based on selection.</li>
             <li>Save to record sale</li>
         </ol>
     </div>
@@ -217,9 +219,10 @@
         <p>Use <code>Quick Create → Purchase Bill</code> or <code>Transactions → Purchase Bill</code></p>
         <ol class="mb-0">
             <li>Select Supplier</li>
+            <li><strong>Select Tax Type:</strong> Choose 'In-State' or 'Out-State'.</li>
             <li>Add Items purchased</li>
             <li>Enter Quantity & Rate</li>
-            <li>Review tax calculations</li>
+            <li>Review tax calculations (CGST/SGST/IGST) in dynamic columns.</li>
             <li>Save to record purchase</li>
         </ol>
     </div>
@@ -249,6 +252,7 @@
         <p>Navigate to <code>Transactions → Estimates/Quotes</code></p>
         <ul class="mb-0">
             <li>Create quotations for customers</li>
+            <li>Select Tax Type to show accurate tax breakdown (CGST/SGST vs IGST).</li>
             <li>Set expiry date</li>
             <li>Convert to invoice when approved</li>
         </ul>
@@ -260,6 +264,7 @@
         <ul class="mb-0">
             <li>Issue credit notes for sales returns</li>
             <li>Issue debit notes for purchase returns</li>
+            <li>Select Tax Type to reverse specific taxes correctly.</li>
             <li>Link to original invoice/bill</li>
         </ul>
     </div>

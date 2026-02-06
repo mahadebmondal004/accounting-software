@@ -38,87 +38,31 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                </div>
-            </div>
-
-            <!-- Shipping & Details Accordion -->
-            <div class="accordion mb-4 shadow-sm" id="shippingAccordion">
-                <div class="accordion-item border-0">
-                    <h2 class="accordion-header" id="headingOne">
-                        <button class="accordion-button collapsed py-2 text-muted bg-white shadow-none" type="button"
-                            data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false"
-                            aria-controls="collapseOne">
-                            <i class="fas fa-truck me-2"></i> Shipping & Order Details (Optional)
-                        </button>
-                    </h2>
-                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
-                        data-bs-parent="#shippingAccordion">
-                        <div class="accordion-body bg-white border-top">
-                            <div class="row g-3">
-                                <div class="col-md-3">
-                                    <label class="form-label small text-muted">PO Number</label>
-                                    <input type="text" name="po_number" class="form-control">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small text-muted">E-Way Bill No</label>
-                                    <input type="text" name="eway_bill_no" class="form-control">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small text-muted">Transport Mode</label>
-                                    <select name="transport_mode" class="form-select">
-                                        <option value="">None</option>
-                                        <option value="Road">Road</option>
-                                        <option value="Rail">Rail</option>
-                                        <option value="Air">Air</option>
-                                        <option value="Ship">Ship</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small text-muted">Vehicle Number</label>
-                                    <input type="text" name="vehicle_number" class="form-control">
-                                </div>
-                                <div class="col-md-12">
-                                    <label class="form-label small text-muted">Shipping Address</label>
-                                    <textarea name="shipping_address" class="form-control" rows="2"
-                                        placeholder="Leave empty if same as billing..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-light border-0 p-3 mb-4">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">Sales Ledger (Credit Revenue)</label>
-                        <select name="sales_ledger_id" class="form-select" required>
-                            <?php foreach ($data['sales_ledgers'] as $sl): ?>
-                                <option value="<?php echo $sl->id; ?>"><?php echo $sl->name; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">Tax Ledger (Credit Output Tax)</label>
-                        <select name="tax_ledger_id" class="form-select" required>
-                            <?php foreach ($data['tax_ledgers'] as $tl): ?>
-                                <option value="<?php echo $tl->id; ?>"><?php echo $tl->name; ?></option>
-                            <?php endforeach; ?>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Tax Type</label>
+                        <select name="tax_type" id="taxType" class="form-select" onchange="toggleTaxColumns()">
+                            <option value="in_state">In-State (CGST + SGST)</option>
+                            <option value="out_state">Out-State (IGST)</option>
                         </select>
                     </div>
                 </div>
             </div>
+
+
 
             <div class="table-responsive mb-4">
                 <table class="table table-bordered align-middle mb-0" id="invTable">
                     <thead class="bg-light text-secondary small text-uppercase">
                         <tr>
-                            <th width="30%" class="ps-3">Item / Product</th>
-                            <th width="10%">Qty</th>
-                            <th width="15%">Rate</th>
-                            <th width="15%">Amount</th>
-                            <th width="10%">Tax %</th>
-                            <th width="15%">Total</th>
+                            <th width="25%" class="ps-3">Item / Product</th>
+                            <th width="8%">Qty</th>
+                            <th width="10%">Rate</th>
+                            <th width="12%">Amount</th>
+                            <th width="8%">Tax %</th>
+                            <th width="10%" class="tax-col-in">CGST</th>
+                            <th width="10%" class="tax-col-in">SGST</th>
+                            <th width="10%" class="tax-col-out d-none">IGST</th>
+                            <th width="12%">Total</th>
                             <th width="5%"></th>
                         </tr>
                     </thead>
@@ -138,17 +82,40 @@
                                         <?php endforeach; ?>
                                 </datalist>
                             </td>
-                            <td><input type="number" name="quantity[]" class="form-control form-control-sm text-end qty"
+                            <td><input type="number" name="quantity[]" step="0.01" class="form-control form-control-sm text-end qty"
                                     value="1" oninput="calcRow(this)"></td>
                             <td><input type="number" name="rate[]" step="0.01"
                                     class="form-control form-control-sm text-end rate" value="0.00"
                                     oninput="calcRow(this)"></td>
-                            <td><input type="number" name="amount[]"
+                            <td><input type="number" name="amount[]" step="0.01"
                                     class="form-control form-control-sm text-end bg-light amt" readonly></td>
-                            <td><input type="number" name="tax_percent[]"
+                            <td><input type="number" name="tax_percent[]" step="0.01"
                                     class="form-control form-control-sm text-end tax_p" value="18"
                                     oninput="calcRow(this)"></td>
-                            <td><input type="number" name="row_total[]"
+
+                            <!-- CGST -->
+                            <td class="tax-col-in">
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control form-control-sm text-end bg-light cgst_amt"
+                                        readonly value="0.00">
+                                </div>
+                            </td>
+                            <!-- SGST -->
+                            <td class="tax-col-in">
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control form-control-sm text-end bg-light sgst_amt"
+                                        readonly value="0.00">
+                                </div>
+                            </td>
+                            <!-- IGST -->
+                            <td class="tax-col-out d-none">
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control form-control-sm text-end bg-light igst_amt"
+                                        readonly value="0.00">
+                                </div>
+                            </td>
+
+                            <td><input type="number" name="row_total[]" step="0.01"
                                     class="form-control form-control-sm text-end bg-light fw-bold total" readonly></td>
                             <td class="text-center">
                                 <button type="button" class="btn btn-sm btn-outline-danger border-0"
@@ -160,24 +127,24 @@
                     </tbody>
                     <tfoot class="bg-white border-top-0">
                         <tr>
-                            <td colspan="7" class="p-3">
+                            <td colspan="9" class="p-3">
                                 <button type="button" class="btn btn-sm btn-primary" onclick="addInvRow()">
                                     <i class="fas fa-plus me-2"></i> Add Item
                                 </button>
                             </td>
                         </tr>
                         <tr class="text-muted text-end">
-                            <td colspan="5" class="border-0">Taxable Amount</td>
+                            <td colspan="7" class="border-0">Taxable Amount</td>
                             <td class="border-0 fw-bold" id="sumTaxable">0.00</td>
                             <td class="border-0"></td>
                         </tr>
                         <tr class="text-muted text-end">
-                            <td colspan="5" class="border-0">Total Tax</td>
+                            <td colspan="7" class="border-0">Total Tax</td>
                             <td class="border-0 fw-bold" id="sumTax">0.00</td>
                             <td class="border-0"></td>
                         </tr>
                         <tr class="text-primary h5 text-end">
-                            <td colspan="5" class="border-0 fw-bold">Grand Total</td>
+                            <td colspan="7" class="border-0 fw-bold">Grand Total</td>
                             <td class="border-0 fw-bold" id="grandTotal">0.00</td>
                             <td class="border-0"></td>
                         </tr>
@@ -235,14 +202,45 @@
         document.getElementById('customerName').value = text;
     });
 
+    function toggleTaxColumns() {
+        var taxType = document.getElementById('taxType').value;
+        var inCols = document.querySelectorAll('.tax-col-in');
+        var outCols = document.querySelectorAll('.tax-col-out');
+
+        if (taxType === 'in_state') {
+            inCols.forEach(el => el.classList.remove('d-none'));
+            outCols.forEach(el => el.classList.add('d-none'));
+        } else {
+            inCols.forEach(el => el.classList.add('d-none'));
+            outCols.forEach(el => el.classList.remove('d-none'));
+        }
+
+        // Recalculate all rows
+        document.querySelectorAll('.qty').forEach(el => calcRow(el));
+    }
+
     function calcRow(el) {
         let row = el.closest('tr');
         let qty = parseFloat(row.querySelector('.qty').value) || 0;
         let rate = parseFloat(row.querySelector('.rate').value) || 0;
         let taxP = parseFloat(row.querySelector('.tax_p').value) || 0;
+        let taxType = document.getElementById('taxType').value;
 
         let amount = qty * rate;
         let taxAmt = amount * (taxP / 100);
+
+        // Split Tax Logic
+        if (taxType === 'in_state') {
+            let halfTax = taxAmt / 2;
+            row.querySelector('.cgst_amt').value = halfTax.toFixed(2);
+            row.querySelector('.sgst_amt').value = halfTax.toFixed(2);
+            row.querySelector('.igst_amt').value = "0.00";
+        } else {
+            row.querySelector('.cgst_amt').value = "0.00";
+            row.querySelector('.sgst_amt').value = "0.00";
+            row.querySelector('.igst_amt').value = taxAmt.toFixed(2);
+        }
+
         let total = amount + taxAmt;
 
         row.querySelector('.amt').value = amount.toFixed(2);

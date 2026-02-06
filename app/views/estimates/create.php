@@ -9,7 +9,7 @@
             <?php echo csrf_field(); ?>
             <div class="card bg-light border-0 p-3 mb-4">
                 <div class="row g-3">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label small fw-bold text-muted">Estimate Number</label>
                         <input type="text" name="estimate_number" class="form-control fw-bold"
                             value="<?php echo $data['estimate_number']; ?>" readonly>
@@ -19,7 +19,14 @@
                         <input type="date" name="estimate_date" class="form-control"
                             value="<?php echo $data['estimate_date']; ?>">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">Tax Type</label>
+                        <select name="tax_type" id="taxType" class="form-select" onchange="toggleTaxColumns()">
+                            <option value="in_state">In-State (CGST+SGST)</option>
+                            <option value="out_state">Out-State (IGST)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
                         <label class="form-label small fw-bold text-muted">Valid Until</label>
                         <input type="date" name="expiry_date" class="form-control"
                             value="<?php echo date('Y-m-d', strtotime('+30 days')); ?>">
@@ -44,12 +51,18 @@
                 <table class="table table-bordered align-middle mb-0" id="invTable">
                     <thead class="bg-light text-secondary small text-uppercase">
                         <tr>
-                            <th width="35%" class="ps-3">Item / Service</th>
-                            <th width="10%">Qty</th>
-                            <th width="15%">Rate</th>
-                            <th width="15%">Amount</th>
-                            <th width="10%">Tax %</th>
-                            <th width="15%">Total</th>
+                            <th width="25%" class="ps-3">Item / Service</th>
+                            <th width="8%">Qty</th>
+                            <th width="12%">Rate</th>
+                            <th width="12%">Amount</th>
+                            <th width="8%">Tax %</th>
+
+                            <!-- Dynamic Tax Columns -->
+                            <th width="8%" class="tax-col-in">CGST</th>
+                            <th width="8%" class="tax-col-in">SGST</th>
+                            <th width="10%" class="tax-col-out d-none">IGST</th>
+
+                            <th width="14%">Total</th>
                             <th width="5%"></th>
                         </tr>
                     </thead>
@@ -78,6 +91,15 @@
                             <td><input type="number" name="tax_percent[]"
                                     class="form-control form-control-sm text-end tax_p" value="18"
                                     oninput="calcRow(this)"></td>
+
+                            <!-- Tax Inputs -->
+                            <td class="tax-col-in"><input type="number"
+                                    class="form-control form-control-sm text-end bg-light cgst_amt" readonly></td>
+                            <td class="tax-col-in"><input type="number"
+                                    class="form-control form-control-sm text-end bg-light sgst_amt" readonly></td>
+                            <td class="tax-col-out d-none"><input type="number"
+                                    class="form-control form-control-sm text-end bg-light igst_amt" readonly></td>
+
                             <td><input type="number" name="row_total[]"
                                     class="form-control form-control-sm text-end bg-light fw-bold total" readonly></td>
                             <td class="text-center">
@@ -96,8 +118,18 @@
                                 </button>
                             </td>
                         </tr>
+                        <tr class="text-muted text-end">
+                            <td colspan="7" class="border-0 col-span-target">Taxable Amount</td>
+                            <td class="border-0 fw-bold" id="sumTaxable">0.00</td>
+                            <td class="border-0"></td>
+                        </tr>
+                        <tr class="text-muted text-end">
+                            <td colspan="7" class="border-0 col-span-target">Total Tax</td>
+                            <td class="border-0 fw-bold" id="sumTax">0.00</td>
+                            <td class="border-0"></td>
+                        </tr>
                         <tr class="text-primary h5 text-end">
-                            <td colspan="5" class="border-0 fw-bold">Grand Total</td>
+                            <td colspan="7" class="border-0 fw-bold col-span-target">Grand Total</td>
                             <td class="border-0 fw-bold" id="grandTotal">0.00</td>
                             <td class="border-0"></td>
                         </tr>
@@ -105,6 +137,9 @@
                 </table>
             </div>
 
+            <!-- Hidden Summaries -->
+            <input type="hidden" name="total_taxable" id="inpTaxable" value="0">
+            <input type="hidden" name="total_tax" id="inpTax" value="0">
             <input type="hidden" name="total_payable" id="inpTotal" value="0">
 
             <div class="row align-items-end">
@@ -134,7 +169,9 @@
             for (var i = 0; i < options.length; i++) {
                 if (options[i].value === val) {
                     var row = e.target.closest('tr');
-                    row.querySelector('.rate').value = options[i].getAttribute('data-price');
+                    var price = options[i].getAttribute('data-price');
+                    if (price == 0) price = '';
+                    row.querySelector('.rate').value = price;
                     row.querySelector('.tax_p').value = options[i].getAttribute('data-tax');
                     row.querySelector('.item_id').value = options[i].getAttribute('data-id');
                     calcRow(e.target);
@@ -144,14 +181,48 @@
         }
     });
 
+    function toggleTaxColumns() {
+        var taxType = document.getElementById('taxType').value;
+        var inCols = document.querySelectorAll('.tax-col-in');
+        var outCols = document.querySelectorAll('.tax-col-out');
+        var colSpans = document.querySelectorAll('.col-span-target');
+
+        if (taxType === 'in_state') {
+            inCols.forEach(el => el.classList.remove('d-none'));
+            outCols.forEach(el => el.classList.add('d-none'));
+            colSpans.forEach(el => el.setAttribute('colspan', '7'));
+        } else {
+            inCols.forEach(el => el.classList.add('d-none'));
+            outCols.forEach(el => el.classList.remove('d-none'));
+            colSpans.forEach(el => el.setAttribute('colspan', '6'));
+        }
+
+        // Recalculate all rows
+        document.querySelectorAll('.qty').forEach(el => calcRow(el));
+    }
+
     function calcRow(el) {
         let row = el.closest('tr');
         let qty = parseFloat(row.querySelector('.qty').value) || 0;
         let rate = parseFloat(row.querySelector('.rate').value) || 0;
         let taxP = parseFloat(row.querySelector('.tax_p').value) || 0;
+        let taxType = document.getElementById('taxType').value;
 
         let amount = qty * rate;
         let taxAmt = amount * (taxP / 100);
+
+        // Split Tax Logic
+        if (taxType === 'in_state') {
+            let halfTax = taxAmt / 2;
+            row.querySelector('.cgst_amt').value = halfTax.toFixed(2);
+            row.querySelector('.sgst_amt').value = halfTax.toFixed(2);
+            row.querySelector('.igst_amt').value = "0.00";
+        } else {
+            row.querySelector('.cgst_amt').value = "0.00";
+            row.querySelector('.sgst_amt').value = "0.00";
+            row.querySelector('.igst_amt').value = taxAmt.toFixed(2);
+        }
+
         let total = amount + taxAmt;
 
         row.querySelector('.amt').value = amount.toFixed(2);
@@ -161,12 +232,26 @@
     }
 
     function calcTotals() {
+        let taxable = 0;
+        let tax = 0;
         let grand = 0;
+
+        document.querySelectorAll('.amt').forEach(e => taxable += parseFloat(e.value) || 0);
+
         document.querySelectorAll('.inv-row').forEach(row => {
-            grand += parseFloat(row.querySelector('.total').value) || 0;
+            let amt = parseFloat(row.querySelector('.amt').value) || 0;
+            let tp = parseFloat(row.querySelector('.tax_p').value) || 0;
+            tax += amt * (tp / 100);
         });
 
+        grand = taxable + tax;
+
+        document.getElementById('sumTaxable').innerText = taxable.toFixed(2);
+        document.getElementById('sumTax').innerText = tax.toFixed(2);
         document.getElementById('grandTotal').innerText = grand.toFixed(2);
+
+        document.getElementById('inpTaxable').value = taxable;
+        document.getElementById('inpTax').value = tax;
         document.getElementById('inpTotal').value = grand;
     }
 

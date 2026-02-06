@@ -245,11 +245,17 @@ class ReportsController extends Controller
         $end_date = $_GET['end_date'] ?? date('Y-m-d');
         $tax_rows = $this->reportModel->getGSTSummary($_SESSION['company_id'], $start_date, $end_date);
 
+        // Fetch detailed breakdowns
+        $gstr1 = $this->reportModel->getDetailedGSTReport($_SESSION['company_id'], 'Sales', $start_date, $end_date);
+        $gstr2 = $this->reportModel->getDetailedGSTReport($_SESSION['company_id'], 'Purchase', $start_date, $end_date);
+
         $data = [
             'nav' => 'reports',
             'start_date' => $start_date,
             'end_date' => $end_date,
-            'tax_rows' => $tax_rows
+            'tax_rows' => $tax_rows,
+            'gstr1' => $gstr1,
+            'gstr2' => $gstr2
         ];
 
         $this->view('reports/gst_report', $data);

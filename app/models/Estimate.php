@@ -56,8 +56,8 @@ class Estimate
                 $estimate_id = $this->db->lastInsertId();
 
                 foreach ($items as $item) {
-                    $this->db->query('INSERT INTO estimate_items (estimate_id, item_id, item_name, quantity, rate, amount, tax_percent, tax_amount, total) 
-                                      VALUES(:estimate_id, :item_id, :item_name, :quantity, :rate, :amount, :tax_percent, :tax_amount, :total)');
+                    $this->db->query('INSERT INTO estimate_items (estimate_id, item_id, item_name, quantity, rate, amount, tax_percent, tax_amount, cgst_amount, sgst_amount, igst_amount, total) 
+                                      VALUES(:estimate_id, :item_id, :item_name, :quantity, :rate, :amount, :tax_percent, :tax_amount, :cgst, :sgst, :igst, :total)');
                     $this->db->bind(':estimate_id', $estimate_id);
                     $this->db->bind(':item_id', $item['item_id']);
                     $this->db->bind(':item_name', $item['name']);
@@ -66,12 +66,16 @@ class Estimate
                     $this->db->bind(':amount', $item['amount']);
                     $this->db->bind(':tax_percent', $item['tax_percent']);
                     $this->db->bind(':tax_amount', $item['tax_amount']);
+                    $this->db->bind(':cgst', $item['cgst_amount'] ?? 0);
+                    $this->db->bind(':sgst', $item['sgst_amount'] ?? 0);
+                    $this->db->bind(':igst', $item['igst_amount'] ?? 0);
                     $this->db->bind(':total', $item['total']);
                     $this->db->execute();
                 }
                 return $estimate_id;
             }
         } catch (Exception $e) {
+            die("Error in createEstimate: " . $e->getMessage());
             return false;
         }
         return false;

@@ -1,6 +1,114 @@
 <?php require APP_ROOT . '/views/layouts/header.php'; ?>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<style>
+    @media print {
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        body {
+            background: white !important;
+            font-family: serif;
+        }
+
+        #sidebarMenu,
+        .navbar,
+        .navbar-neu,
+        .sidebar-neu,
+        .btn,
+        form,
+        footer,
+        .no-print {
+            display: none !important;
+        }
+
+        .container-fluid,
+        .row,
+        .col-md-9,
+        .col-lg-10,
+        main,
+        .ms-sm-auto {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+            display: block !important;
+            position: static !important;
+        }
+
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .card-body {
+            padding: 0 !important;
+        }
+
+        .print-header {
+            display: block !important;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+
+        .table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid #ddd !important;
+            padding: 8px !important;
+            font-size: 12pt;
+        }
+
+        .table thead th {
+            background-color: #f0f0f0 !important;
+            -webkit-print-color-adjust: exact;
+            color: #000 !important;
+        }
+
+        .badge {
+            border: 1px solid #000;
+            color: #000 !important;
+            background: none !important;
+            padding: 2px 5px;
+        }
+
+        a {
+            text-decoration: none !important;
+            color: #000 !important;
+        }
+    }
+
+    .print-header {
+        display: none;
+    }
+</style>
+
+<?php
+$ledger_name = '';
+foreach ($data['ledgers'] as $l) {
+    if ($l->id == $data['selected_ledger']) {
+        $ledger_name = $l->name;
+        break;
+    }
+}
+?>
+
+<div class="print-header">
+    <h2><?php echo $_SESSION['company_name'] ?? 'Company Name'; ?></h2>
+    <h4><?php echo ucfirst($data['type']); ?> Book: <?php echo htmlspecialchars($ledger_name); ?></h4>
+    <p>From: <strong><?php echo date('d-M-Y', strtotime($data['start_date'])); ?></strong> To:
+        <strong><?php echo date('d-M-Y', strtotime($data['end_date'])); ?></strong></p>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
     <h4><i class="fas fa-book text-success"></i> <?php echo ucfirst($data['type']); ?> Book</h4>
 
     <form class="d-flex align-items-center" method="get">
@@ -49,7 +157,8 @@
                     <td class="text-end"><?php echo ($data['opening'] > 0) ? number_format($data['opening'], 2) : ''; ?>
                     </td>
                     <td class="text-end">
-                        <?php echo ($data['opening'] < 0) ? number_format(abs($data['opening']), 2) : ''; ?></td>
+                        <?php echo ($data['opening'] < 0) ? number_format(abs($data['opening']), 2) : ''; ?>
+                    </td>
                     <td class="text-end"><?php echo number_format($data['opening'], 2); ?></td>
                 </tr>
 
@@ -69,7 +178,8 @@
                         <td class="text-end text-success"><?php echo ($t->debit > 0) ? number_format($t->debit, 2) : '-'; ?>
                         </td>
                         <td class="text-end text-danger">
-                            <?php echo ($t->credit > 0) ? number_format($t->credit, 2) : '-'; ?></td>
+                            <?php echo ($t->credit > 0) ? number_format($t->credit, 2) : '-'; ?>
+                        </td>
                         <td class="text-end fw-bold"><?php echo number_format($running_balance, 2); ?></td>
                     </tr>
                 <?php endforeach; ?>

@@ -73,26 +73,20 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link-neu <?php echo (isset($data['nav']) && $data['nav'] == 'sales') ? 'active' : ''; ?>"
-                                    href="<?php echo APP_URL; ?>/sales/create">
-                                    <i class="fas fa-file-invoice"></i> Sales Invoice
+                                    href="<?php echo APP_URL; ?>/sales/index">
+                                    <i class="fas fa-file-invoice"></i> Sales Invoices
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link-neu <?php echo (isset($data['nav']) && $data['nav'] == 'purchases') ? 'active' : ''; ?>"
-                                    href="<?php echo APP_URL; ?>/purchases/create">
-                                    <i class="fas fa-shopping-cart"></i> Purchase Bill
+                                    href="<?php echo APP_URL; ?>/purchases/index">
+                                    <i class="fas fa-shopping-cart"></i> Purchase Bills
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link-neu <?php echo (isset($data['nav']) && isset($data['type']) && $data['type'] == 'Credit Note') ? 'active' : ''; ?>"
-                                    href="<?php echo APP_URL; ?>/returns/sales_return">
-                                    <i class="fas fa-undo text-primary"></i> Sales Return
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link-neu <?php echo (isset($data['nav']) && isset($data['type']) && $data['type'] == 'Debit Note') ? 'active' : ''; ?>"
-                                    href="<?php echo APP_URL; ?>/returns/purchase_return">
-                                    <i class="fas fa-undo text-secondary"></i> Purchase Return
+                                <a class="nav-link-neu <?php echo (isset($data['nav']) && $data['nav'] == 'returns') ? 'active' : ''; ?>"
+                                    href="<?php echo APP_URL; ?>/returns/index">
+                                    <i class="fas fa-undo text-primary"></i> Returns
                                 </a>
                             </li>
 
@@ -296,4 +290,19 @@
                             </div>
                         </div>
                     </nav>
+
+                    <!-- Flash Messages -->
+                    <?php if (isset($_SESSION['flash_message'])): ?>
+                        <div class="alert alert-<?php echo $_SESSION['flash_type'] ?? 'info'; ?> alert-dismissible fade show mt-3"
+                            role="alert">
+                            <i
+                                class="fas fa-<?php echo $_SESSION['flash_type'] == 'success' ? 'check-circle' : ($_SESSION['flash_type'] == 'danger' ? 'exclamation-circle' : 'info-circle'); ?> me-2"></i>
+                            <?php echo $_SESSION['flash_message']; ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        <?php
+                        unset($_SESSION['flash_message']);
+                        unset($_SESSION['flash_type']);
+                        ?>
+                    <?php endif; ?>
                 <?php endif; ?>

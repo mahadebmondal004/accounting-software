@@ -31,22 +31,41 @@ class Invoice
 
         foreach ($items as $item) {
             $this->db->query('INSERT INTO invoice_items 
-                (voucher_id, item_id, item_name, quantity, rate, amount, tax_percent, tax_amount, total)
-                VALUES (:vid, :iid, :name, :qty, :rate, :amt, :tax_p, :tax_a, :total)');
+                (voucher_id, item_id, item_name, quantity, rate, amount, tax_percent, tax_amount, cgst_amount, sgst_amount, igst_amount, total)
+                VALUES (:vid, :iid, :name, :qty, :rate, :amt, :tax_p, :tax_a, :cgst, :sgst, :igst, :total)');
 
             $this->db->bind(':vid', $data['voucher_id']);
-            $this->db->bind(':iid', $item['item_id']); // Can be null
+            // Handle item_id - if not provided or 0, set to NULL
+            $item_id = isset($item['item_id']) && $item['item_id'] > 0 ? $item['item_id'] : null;
+            $this->db->bind(':iid', $item_id);
             $this->db->bind(':name', $item['name']);
             $this->db->bind(':qty', $item['quantity']);
             $this->db->bind(':rate', $item['rate']);
             $this->db->bind(':amt', $item['amount']); // Basic
             $this->db->bind(':tax_p', $item['tax_percent']);
             $this->db->bind(':tax_a', $item['tax_amount']);
+            $this->db->bind(':cgst', $item['cgst_amount'] ?? 0);
+            $this->db->bind(':sgst', $item['sgst_amount'] ?? 0);
+            $this->db->bind(':igst', $item['igst_amount'] ?? 0);
             $this->db->bind(':total', $item['total']);
 
             $this->db->execute();
         }
 
         return true;
+    }
+
+    public function getInvoiceDetails($voucher_id)
+    {
+        $this->db->query("SELECT * FROM invoice_details WHERE voucher_id = :vid");
+        $this->db->bind(':vid', $voucher_id);
+        return $this->db->single();
+    }
+
+    public function getInvoiceItems($voucher_id)
+    {
+        $this->db->query("SELECT * FROM invoice_items WHERE voucher_id = :vid");
+        $this->db->bind(':vid', $voucher_id);
+        return $this->db->resultSet();
     }
 }
