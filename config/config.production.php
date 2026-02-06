@@ -2,11 +2,25 @@
 // Production Configuration for Hostinger
 // Copy this to config/config.php after deployment
 
+// Simple .env parser
+if (file_exists(__DIR__ . '/../.env')) {
+    $lines = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos($line, '#') === 0)
+            continue;
+        if (strpos($line, '=') !== false) {
+            list($name, $value) = explode('=', $line, 2);
+            putenv(trim($name) . '=' . trim($value));
+            $_ENV[trim($name)] = trim($value);
+        }
+    }
+}
+
 // Database Configuration
-define('DB_HOST', 'localhost'); // Hostinger MySQL host
-define('DB_USER', 'your_database_username'); // Replace with your Hostinger DB username
-define('DB_PASS', 'your_database_password'); // Replace with your Hostinger DB password
-define('DB_NAME', 'your_database_name'); // Replace with your Hostinger DB name
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_USER', getenv('DB_USER') ?: 'u313315785_account');
+define('DB_PASS', getenv('DB_PASS') ?: 'Mahadev@9870');
+define('DB_NAME', getenv('DB_NAME') ?: 'u313315785_account');
 
 // App Root
 define('APP_ROOT', dirname(dirname(__FILE__)));
