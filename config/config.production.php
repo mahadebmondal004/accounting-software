@@ -12,7 +12,7 @@ define('DB_NAME', 'your_database_name'); // Replace with your Hostinger DB name
 define('APP_ROOT', dirname(dirname(__FILE__)));
 
 // URL Root - IMPORTANT: Update this to your domain
-define('APP_URL', 'https://yourdomain.com'); // Replace with your actual domain
+define('APP_URL', 'https://kamglobalai.com');
 
 // Site Name
 define('SITE_NAME', 'AccuBooks - Accounting Software');
